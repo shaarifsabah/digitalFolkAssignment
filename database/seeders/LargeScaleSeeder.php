@@ -15,7 +15,7 @@ class LargeScaleSeeder extends Seeder
     {
         $chunkSize = 1000;
         $totalRecords = 100000;
-        $locales = ['en', 'fr', 'es', 'de', 'it'];
+        $locales = ['en', 'fr', 'es'];
 
         $translations = [];
         for ($i = 0; $i < $totalRecords; $i++) {

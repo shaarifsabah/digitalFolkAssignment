@@ -11,15 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('locales', function (Blueprint $table) {
+            $table->id();
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->timestamps();
+        });
+
         Schema::create('translations', function (Blueprint $table) {
             $table->id();
-            $table->string('locale')->index();
+            $table->foreignId('locale_id')->constrained()->cascadeOnDelete();
             $table->string('key')->index();
             $table->text('content');
             $table->timestamps();
 
-            $table->unique(['locale', 'key']);
-            $table->fullText('content'); 
+            $table->unique(['locale_id', 'key']);
+            // $table->fullText('content'); // SQLite support varies, omitting for stability in test task.
         });
 
         Schema::create('tags', function (Blueprint $table) {
@@ -46,5 +53,6 @@ return new class extends Migration
         Schema::dropIfExists('tag_translation');
         Schema::dropIfExists('tags');
         Schema::dropIfExists('translations');
+        Schema::dropIfExists('locales');
     }
 };

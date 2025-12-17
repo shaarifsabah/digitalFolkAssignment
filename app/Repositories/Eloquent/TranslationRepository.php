@@ -20,8 +20,13 @@ class TranslationRepository implements TranslationRepositoryInterface
 
     public function create(array $data): Translation
     {
+        $locale = \App\Models\Locale::firstOrCreate(
+            ['code' => $data['locale']],
+            ['name' => $data['locale']]
+        );
+
         $translation = Translation::create([
-            'locale' => $data['locale'],
+            'locale_id' => $locale->id,
             'key' => $data['key'],
             'content' => $data['content'],
         ]);
@@ -30,12 +35,12 @@ class TranslationRepository implements TranslationRepositoryInterface
             $this->syncTags($translation, $data['tags']);
         }
 
-        return $translation->load('tags');
+        return $translation->load(['tags', 'locale']);
     }
 
     public function find(int $id): ?Translation
     {
-        return Translation::with('tags')->find($id);
+        return Translation::with(['tags', 'locale'])->find($id);
     }
 
     public function update(Translation $translation, array $data): Translation
@@ -48,7 +53,7 @@ class TranslationRepository implements TranslationRepositoryInterface
             $this->syncTags($translation, $data['tags']);
         }
 
-        return $translation->load('tags');
+        return $translation->load(['tags', 'locale']);
     }
 
     public function delete(Translation $translation): void
@@ -56,16 +61,18 @@ class TranslationRepository implements TranslationRepositoryInterface
         $translation->delete();
     }
 
-    public function export(string $locale): Collection
+    public function export(string $localeCode): Collection
     {
-        return Translation::where('locale', $locale)->pluck('content', 'key');
+        return Translation::whereHas('locale', function($q) use ($localeCode) {
+            $q->where('code', $localeCode);
+        })->pluck('content', 'key');
     }
 
-    public function exists(string $locale, string $key): bool
+    public function exists(string $localeCode, string $key): bool
     {
-        return Translation::where('locale', $locale)
-            ->where('key', $key)
-            ->exists();
+        return Translation::whereHas('locale', function($q) use ($localeCode) {
+            $q->where('code', $localeCode);
+        })->where('key', $key)->exists();
     }
 
     protected function syncTags(Translation $translation, array $tagNames): void

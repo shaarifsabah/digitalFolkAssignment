@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tag extends Model
+class Locale extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['code', 'name'];
 
     public function translations()
     {
-        return $this->belongsToMany(Translation::class);
+        return $this->hasMany(Translation::class);
     }
     //
 }

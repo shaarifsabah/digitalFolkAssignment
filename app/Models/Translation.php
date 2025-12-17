@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Translation extends Model
 {
-    protected $fillable = ['locale', 'key', 'content'];
+    protected $fillable = ['locale_id', 'key', 'content'];
+
+    public function locale()
+    {
+        return $this->belongsTo(Locale::class);
+    }
 
     public function tags()
     {

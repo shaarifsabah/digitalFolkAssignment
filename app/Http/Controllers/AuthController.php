@@ -24,6 +24,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = User::where('email', $request->email)->first();
+            $user->tokens()->delete();
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return $this->sendResponse(true, ['access_token' => $token, 'token_type' => 'Bearer'], 'Login successful');
@@ -39,5 +40,17 @@ class AuthController extends Controller
     public function getUser(Request $request)
     {
         return $this->sendResponse(true, $request->user(), 'User retrieved successfully');
+    }
+
+    /**
+     * Logout the user and revoke current token.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return $this->sendResponse(true, message: 'Logged out successfully');
     }
 }
